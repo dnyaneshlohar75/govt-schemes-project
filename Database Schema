@@ -1,0 +1,48 @@
+Demo_DB Schema 
+
+User:-
+User_id       
+Name   string
+DOB   date
+Gender   boolean 
+Email_id    string
+Mob_no   string(15)
+Address   string
+District   string
+State   string
+Created_at   timestamp
+
+CREATE TABLE users (user_id SERIAL PRIMARY KEY, name VARCHAR(100) NOT NULL, dob DATE NOT NULL, gender BOOLEAN NOT NULL, email_id VARCHAR(100) UNIQUE NOT NULL, mob_no VARCHAR(15) UNIQUE NOT NULL, address TEXT, district VARCHAR(100), state VARCHAR(100), created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP);
+
+Scheme:-
+Scheme_id 
+Name   string
+Start_date   date
+Benefits   string[]
+Owner   string 
+Is_active   boolean 
+Created_at   timestamp
+CREATE TABLE schemes (scheme_id SERIAL PRIMARY KEY, name VARCHAR(100) NOT NULL, start_date DATE NOT NULL, benefits TEXT[] NOT NULL, owner VARCHAR(100) NOT NULL, is_active BOOLEAN DEFAULT TRUE, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP);
+
+Documents_Required
+D_id 
+Name   string
+Type   string
+Doc_size   string/int
+File_url   string
+CREATE TABLE documents_required (d_id SERIAL PRIMARY KEY, name VARCHAR(100) NOT NULL, type VARCHAR(50) NOT NULL, doc_size VARCHAR(20), file_url TEXT NOT NULL);
+Documents 
+Doc_id 
+User_id  (FK) (Users.user_id)
+Doc_name   string
+Doc_type  string
+Doc_file   BLOB
+Uploaded_at   timestamp
+CREATE TABLE documents (doc_id SERIAL PRIMARY KEY, user_id INT REFERENCES users(user_id) ON DELETE CASCADE, doc_name VARCHAR(100) NOT NULL, doc_type VARCHAR(50) NOT NULL, doc_file BYTEA NOT NULL, uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP);
+
+Scheme_Documents 
+S_d_id
+Scheme_id   (FK) (Schemes.Scheme_id)
+Doc_id   (FK) (Documents.Doc_id)
+
+CREATE TABLE scheme_documents (s_d_id SERIAL PRIMARY KEY, scheme_id INT REFERENCES schemes(scheme_id) ON DELETE CASCADE, doc_id INT REFERENCES documents(doc_id) ON DELETE CASCADE);
