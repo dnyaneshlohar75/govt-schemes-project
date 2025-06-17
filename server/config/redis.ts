@@ -25,10 +25,6 @@ redis.on('connect', () => {
     console.log("[INFO] Redis server connected");
 })
 
-redis.on('connecting', () => {
-    console.log("[INFO] Redis server connecting...");
-})
-
 redis.on('error', (error) => {
     console.log("[ERROR] Redis server connection failed");
     console.log("[ERROR]", error.message);

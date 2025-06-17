@@ -3,6 +3,7 @@ import { redis } from "../config/redis";
 import bcrypt from 'bcrypt'
 import { client } from "../config/twilio";
 import { generateToken } from "../utils/functions";
+import db from "../config/db";
 
 export async function sendOneTimePassword(request: Request, response: Response) {
     const { aadharCardNumber } = request.body;
@@ -14,10 +15,17 @@ export async function sendOneTimePassword(request: Request, response: Response) 
     }
 
     try {
-        //find mobile number using aadhar card number
-        const contactNumber = "+917499378600";
+        const user = await db.user_table.findFirst({
+            where: { uidai_number: aadharCardNumber },
+            select: { mobile_number: true, name: true }
+        });
 
-        const isOTPExist = await redis.get(aadharCardNumber);
+        if(!user?.mobile_number) {
+            response.json({ message: "Your mobile number is not linked with aadhar card."}).status(403);
+            return;
+        }
+
+        const isOTPExist = await redis.get(user?.mobile_number);
         
         if (isOTPExist) {
             response.json({ message: "OTP already sent, please wait for the expiry time" }).status(400);
@@ -27,12 +35,12 @@ export async function sendOneTimePassword(request: Request, response: Response) 
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
         const encryptedOTP = bcrypt.hashSync(otp, 7);
 
-        await redis.setex(aadharCardNumber, OTP_EXPIRY, encryptedOTP);
+        await redis.setex(user?.mobile_number, OTP_EXPIRY, encryptedOTP);
 
         client.messages.create({
-            to: `+91${contactNumber}`,
+            to: `+91${user?.mobile_number}`,
             from: process.env.TWILIO_PHONE_NUMBER as string,
-            body: `Hi User, Your One-Time Password is ${otp}`,
+            body: `Hi ${user.name}, Your One-Time Password is ${otp}`,
             messagingServiceSid: 'MGab6e0667c3b0d71fdccf8d1c0399de66',
         }).then(msg => console.log(msg.sid)).catch(err => console.log("[ERROR]", err));
 
@@ -40,7 +48,7 @@ export async function sendOneTimePassword(request: Request, response: Response) 
 
     } catch(error) {
         console.error("Error sending OTP:", error);
-        response.status(500).json({ error: "Failed to send OTP" });
+        response.status(500).json({ message: "Failed to send OTP" });
         return;
     }
 }

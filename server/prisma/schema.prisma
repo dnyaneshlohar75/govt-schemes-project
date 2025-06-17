@@ -1,0 +1,97 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum gender {
+  male
+  female
+  other
+}
+
+enum file_type {
+  image
+  pdf
+  doc
+}
+
+enum marital_status_type {
+  single
+  married
+  divorced
+  widowed
+  seperated
+}
+
+model user_table {
+  user_id        String              @id @default(uuid())
+  uidai_number   Int                 @unique
+  name           String
+  date_of_birth  DateTime
+  gender         gender              @default(male)
+  email_id       String              @unique @default("")
+  mobile_number  String              @db.VarChar(15)
+  marital_status marital_status_type @default(single)
+  address        String
+  district       String
+  state          String
+  created_at     DateTime            @default(now())
+  updated_at     DateTime            @updatedAt
+
+  documents user_documents_table[]
+
+  @@index([mobile_number])
+  @@index([uidai_number])
+  @@index([state, district])
+}
+
+model user_documents_table {
+  user_document_id       String     @id @default(uuid())
+  name                   String     @default("")
+  document_serial_number String     @unique
+  type                   file_type  @default(image)
+  size                   Decimal    @default(0)
+  document_url           String     @default("")
+  expiry_date            DateTime
+  authorized_by          String
+  is_verified            Boolean    @default(false)
+  created_at             DateTime   @default(now())
+  updated_at             DateTime   @updatedAt
+  userTableUserId        String
+  user                   user_table @relation(fields: [userTableUserId], references: [user_id], onDelete: Cascade)
+}
+
+model scheme_table {
+  scheme_id           String             @id @default(uuid())
+  name                String
+  description         String?
+  start_date          DateTime
+  end_date            DateTime?
+  benefits            String[]
+  eligibility_factors String[]
+  beneficiary         String[]
+  required_documents  scheme_documents[] @relation("SchemeDocuments")
+  owner               String
+  scheme_url          String?            @default("")
+  is_active           Boolean            @default(true)
+  created_at          DateTime           @default(now())
+  updated_at          DateTime           @updatedAt
+}
+
+model scheme_documents {
+  required_document_id  String        @id @default(uuid())
+  document_name         String
+  is_required           Boolean       @default(true)
+  scheme_tableScheme_id String?
+  scheme                scheme_table? @relation("SchemeDocuments", fields: [scheme_tableScheme_id], references: [scheme_id], onDelete: Cascade)
+}
