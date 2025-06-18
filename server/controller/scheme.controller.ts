@@ -7,7 +7,7 @@ export async function getEligibleSchemes(request: Request, response: Response): 
     try {
         const user = await db.user_table.findFirst({
             where: { user_id: userId },
-            include: { documents: true }, // adjust based on your relation name
+            include: { documents: true },
         });
 
         if (!user) {

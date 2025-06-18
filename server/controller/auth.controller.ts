@@ -57,14 +57,13 @@ export async function verifyOneTimePassword(request: Request, response: Response
     const {otp, aadharCardNumber} = request.body;
 
     try {
-        const storedOTP = await redis.get(aadharCardNumber);
+        const isUserExist = await db.user_table.findFirst({ where: { uidai_number: aadharCardNumber } });
+        const storedOTP = await redis.get(isUserExist?.mobile_number as string);
 
         if (!storedOTP) {
             response.json({ message: "OTP expired or not found" }).status(400);
             return;
         }
-
-        const isUserExist = await db.user_table.findFirst({ where: { uidai_number: aadharCardNumber } });
 
         if (bcrypt.compareSync(otp, storedOTP)) {
             
