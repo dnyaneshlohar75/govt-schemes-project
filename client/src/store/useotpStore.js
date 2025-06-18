@@ -1,29 +1,42 @@
-import { create } from "zustand";
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 
-const useOtpStore = create((set) => ({
-  countryCode: "+91",
-  mobile: "",
-  otp: "",
-  showOtp: false,
-  resendEnabled: false,
-  loading: false,
-  alert: "",
-  setCountryCode: (val) => set({ countryCode: val }),
-  setMobile: (val) => set({ mobile: val }),
-  setOtp: (val) => set({ otp: val }),
- 
-  setShowOtp: (val) => set({ showOtp: val }),
-  setResendEnabled: (val) => set({ resendEnabled: val }),
-  setLoading: (val) => set({ loading: val }),
-  setAlert: (val) => set({ alert: val }),
-  resetOtpState: () =>
-    set({
-      otp: "",
+const useOtpStore = create(
+  persist(
+    (set) => ({
+      countryCode: '+91',
+      aadharCardNumber: '',
+      otp: '',
+       timeLeft: 300,
+      isOTPSent: false,
       showOtp: false,
       resendEnabled: false,
       loading: false,
-      alert: "",
+      alert: '',
+
+      setCountryCode: (val) => set({ countryCode: val }),
+      setAadharCardNumber: (val) => set({ aadharCardNumber: val }),
+      setOtp: (val) => set({ otp: val }),
+      setIsOTPSent: (val) => set({ isOTPSent: val }),
+       setTimeLeft: (val) => set({ timeLeft: val }),
+      setShowOtp: (val) => set({ showOtp: val }),
+      setResendEnabled: (val) => set({ resendEnabled: val }),
+      setLoading: (val) => set({ loading: val }),
+      setAlert: (val) => set({ alert: val }),
+
+      resetOtpState: () =>
+        set({
+          otp: '',
+          showOtp: false,
+          resendEnabled: false,
+          loading: false,
+          alert: '',
+        }),
     }),
-}));
+    {
+      name: 'otp-store',
+    }
+  )
+);
 
 export default useOtpStore;

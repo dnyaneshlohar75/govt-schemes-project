@@ -1,25 +1,30 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { useState } from 'react';
-// import Login from './Pages/Login';
-// import UserPage from './Pages/UserPage';
-// import MainNavbar from './components/MainNavbar';
-// import SchemaPage from './Pages/SchemaPage';
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import Login from './pages/Login';
+import Layout from './pages/Layout';
+import UserDashboard from './pages/UserDashboard';
+import SchemeDashboard from './pages/SchemeDashboard';
 
 function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-
-  return (
-    <BrowserRouter>
-      {/* {isLoggedIn && <MainNavbar/>} Show navbar only when logged in */}
-
-      <Routes>
-        <Route path="/" element={<Login setIsLoggedIn={setIsLoggedIn} />} />
-        {/* <Route path="/user" element={<UserPage />} />
-        <Route path="/scheme" element={<SchemaPage />} /> */}
-      </Routes>
-    </BrowserRouter>
-  );
+const route = createBrowserRouter([
+  {
+    path:'/',
+    element:<Layout/>,
+    children:[
+      {
+        path:'',element:<Login />
+      },
+      {
+        path:"/user",
+        element:<UserDashboard/>
+      },
+      {
+        path:"/dashboard",
+        element:<SchemeDashboard/>
+      }
+    ]
+  }
+])
+  return <RouterProvider router={route}/>
 }
 
 export default App;
