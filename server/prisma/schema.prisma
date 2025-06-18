@@ -35,7 +35,7 @@ enum marital_status_type {
 
 model user_table {
   user_id        String              @id @default(uuid())
-  uidai_number   Int                 @unique
+  uidai_number   String                 @unique
   name           String
   date_of_birth  DateTime
   gender         gender              @default(male)

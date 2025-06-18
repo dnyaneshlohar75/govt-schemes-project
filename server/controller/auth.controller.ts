@@ -64,16 +64,11 @@ export async function verifyOneTimePassword(request: Request, response: Response
             return;
         }
 
-        const isUserExist = {
-            userId: "12345",
-            name: "John Doe",
-            username: "johndoe",
-            email: "abc@gmail.com"
-        };
+        const isUserExist = await db.user_table.findFirst({ where: { uidai_number: aadharCardNumber } });
 
         if (bcrypt.compareSync(otp, storedOTP)) {
             
-            const token = generateToken(isUserExist);
+            const token = generateToken(isUserExist?.user_id as string);
             response.json({ message: "User logged in", token, user: isUserExist }).status(200);
 
             await redis.del(aadharCardNumber);

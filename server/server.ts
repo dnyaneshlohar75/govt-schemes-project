@@ -9,6 +9,7 @@ import userRoute from "./routes/user";
 import { welcome } from "./controller/public.controller";
 import authRoute from "./routes/auth";
 import db from "./config/db";
+import schemeRoute from "./routes/schemes";
 
 const app = express();
 
@@ -17,6 +18,7 @@ app.use(express.json());
 
 app.use("/api/auth/", authRoute);
 app.use('/api/user/', userRoute);
+app.use('/api/schemes/', schemeRoute);
 
 app.get("/", welcome);
 

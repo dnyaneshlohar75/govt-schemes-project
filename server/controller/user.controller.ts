@@ -1,6 +1,37 @@
 import { Request, Response } from "express";
 import db from "../config/db";
 
+export async function createNewUser(request: Request, response: Response) {
+    const { name, emailId, uidaiNumber, gender, maritalStatus, dateOfBirth, mobileNumber, address, state, district } = request.body;
+
+    try {
+        const newUser = await db.user_table.create({
+            data: {
+                name,
+                email_id: emailId,
+                uidai_number: uidaiNumber,
+                mobile_number: mobileNumber,
+                gender: gender,
+                marital_status: maritalStatus,
+                address: address,
+                state: state,
+                district: district,
+                date_of_birth: new Date(dateOfBirth),
+            }
+        });
+
+        response.status(201).json({
+            message: "User created successfully",
+            response: true,
+            timestamp: new Date(Date.now()),
+            userId: newUser.user_id
+        });
+    } catch (error) {
+        console.error("[ERROR] Error creating user:", error);
+        response.status(500).json({ message: "Internal server error", error, response: false, timestamp: new Date(Date.now()) });
+    }
+}
+
 export async function getUserDetailsById(request: Request, response: Response) {
     const { userId } = request.params;
 
