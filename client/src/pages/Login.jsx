@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import {useEffect} from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -16,6 +16,7 @@ import useOtpStore from '../store/useotpStore';
 // } from "@/components/ui/select"
 const Login = () => {
   const navigate = useNavigate();
+  // const [timeLeft,setTimeLeft]=useState(300)
   const {
   //  countryCode,
     aadharCardNumber,
@@ -47,7 +48,7 @@ const Login = () => {
 
   useEffect(() => {
     if (showOtp) {
-      setTimeLeft(300);
+      setTimeLeft(30);
       setResendEnabled(false);
       const interval = setInterval(() => {
         setTimeLeft((prev) => {
@@ -63,12 +64,17 @@ const Login = () => {
       return () => clearInterval(interval);
     }
   }, [showOtp]);
-  const formatTime = (seconds) => {
-    const m = Math.floor(seconds / 60).toString().padStart(2, '0');
-    const s = (seconds % 60).toString().padStart(2, '0');
-    return `${m}:${s}`;
-  };
- const handleSendOtp = async () => {
+const formatTime = (seconds) => {
+  if (typeof seconds !== "number" || isNaN(seconds)) return "00:00";
+
+  const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+  const s = (seconds % 60).toString().padStart(2, '0');
+  return `${m}:${s}`;
+};
+
+const handleSendOtp = async (e) => {
+  e.preventDefault();
+
   if (!aadharCardNumber) {
     setAlert('Please enter your Aadhar card number');
     return;
@@ -78,50 +84,59 @@ const Login = () => {
   try {
     const response = await fetch('http://localhost:5000/api/auth/otp/send', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        aadharCardNumber,
-      }),
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ aadharCardNumber }),
     });
+
     const data = await response.json();
 
     if (response.ok) {
-      setIsOTPSent(true);
-      setShowOtp(true);
-      setAlert(data.message || 'OTP sent successfully');
+      if (data.message?.includes("not linked")) {
+        setAlert(data.message);  // Aadhaar not linked with mobile
+        setShowOtp(false);       // Don't show OTP input
+      } else {
+        setIsOTPSent(true);
+        setShowOtp(true);
+        setAlert(data.message || 'OTP sent successfully');
+      }
     } else {
       setAlert(data.message || 'Failed to send OTP');
+      setShowOtp(false); // safety fallback
     }
   } catch (error) {
     console.error('Send OTP error:', error);
     setAlert('An error occurred while sending OTP');
+    setShowOtp(false);
   }
+
   setLoading(false);
 };
 
 
-  const handleVerifyOtp = async () => {
+  const handleVerifyOtp = async (e) => {
+  e.preventDefault()
   if (!otp) {
     setAlert('Please enter the OTP');
     return;
   }
 
   setLoading(true);
+  
   try {
     const response = await fetch('http://localhost:5000/api/auth/otp/verify', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ aadharCardNumber, otp }),
     });
-
+  
     const data = await response.json();
-console.log({data});
+   console.log({data});
 
 if (data.token) {
       setAlert('Login successful');
+      resetOtpState();
       document.cookie = `token=${data.token}`;
+      localStorage.setItem("userId", data.user.userId); 
       navigate('/dashboard');
     } else {
       setAlert(data.message || 'Invalid OTP');
@@ -137,27 +152,27 @@ if (data.token) {
 
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-100 px-4 py-4">
-      <div className="flex flex-col md:flex-row lg:flex-row bg-white rounded-3xl w-full max-w-7xl h-[700px] md:h-[600px] lg:h-[700px] justify-center text-center shadow-lg overflow-hidden">
+    <div className="flex justify-center items-center min-h-screen  px-4 py-4 bg-white dark:bg-[#24262b]">
+      <div className="flex flex-col md:flex-row lg:flex-row  rounded-3xl w-full max-w-7xl bg-gray-50 dark:bg-[#24252b] h-[700px] md:h-[600px] lg:h-[700px] justify-center text-center shadow-lg overflow-hidden">
 
-        <div className="flex w-full lg:w-[80%] justify-center items-center p-6   border-gray-400">
+        <div className="flex w-full lg:w-[100%] justify-center items-center p-6 ">
           <img src="/Images/image.png" className="w-[100%] h-full md:h-[50%] lg:h-[50%]" alt="Scheme.png"/>
         </div>
 
         {/* Right Section */}
-        <div className="w-full lg:w-[80%] mb-20 lg:p-8 p-6 flex flex-col justify-center  gap-6">
+        <div className="w-full lg:w-[80%]  mb-20 lg:p-8 p-6 flex flex-col justify-center  gap-6">
           {alert && (
             <div className="text-red-800 border  border-red-400 px-4 py-2 rounded text-sm bg-red-100">
               {alert}
             </div>
           )}
 
-          <h2 className="text-xl lg:text-3xl  font-bold text-center lg:text-left">
-            Apply for Schemes or Check Eligibility
-          </h2>
+          <Label className="text-xl lg:text-3xl  font-bold text-center lg:text-left">
+            Apply for Schemes and Check Eligibility
+          </Label>
 
           <p className="text-gray-600 lg:text-xl text-sm sm:text-base text-center lg:text-left">
-            Use your Aadhar-linked mobile number to proceed.
+            Use your Aadhar mobile number to proceed.
           </p>
 
           <form onSubmit={showOtp ? handleVerifyOtp : handleSendOtp} className="flex flex-col gap-5">
@@ -243,13 +258,16 @@ if (data.token) {
             )}
 
             {/* Submit Button */}
-            <Button
+            <div className="flex justify-end">
+ <Button
               type="submit"
-              className="w-full bg-green-700 hover:bg-green-600"
+              className="w-[30%] bg-green-700 hover:bg-green-600"
             disabled={loading}
             >
-            {loading ?'Please wait...':showOtp?'Verify OTP':'Send OTP'}
+           {showOtp?'Verify OTP':'Send OTP'}
             </Button>
+            </div>
+           
           </form>
         </div>
       </div>

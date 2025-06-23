@@ -1,13 +1,16 @@
 import React from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
-import Navbar from './Navbar';
+import MainNavbar from '../components/customUI/MainNavbar';
+import Navbar from '@/components/customUI/Navbar';
+import MitraBot from './MitraBot';
 
 const Layout = () => {
      const location = useLocation();
   const hideNavbar = location.pathname === "/"; 
   return (
     <div>
-        {!hideNavbar && <Navbar />}
+        {!hideNavbar ? <MainNavbar />:<Navbar/>}  
+       {!hideNavbar &&<MitraBot/> } 
         <Outlet/>
     </div>
   )

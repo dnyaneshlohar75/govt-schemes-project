@@ -6,7 +6,7 @@ const useOtpStore = create(
     (set) => ({
       countryCode: '+91',
       aadharCardNumber: '',
-      otp: '',
+       otp: '',
        timeLeft: 300,
       isOTPSent: false,
       showOtp: false,
@@ -18,7 +18,10 @@ const useOtpStore = create(
       setAadharCardNumber: (val) => set({ aadharCardNumber: val }),
       setOtp: (val) => set({ otp: val }),
       setIsOTPSent: (val) => set({ isOTPSent: val }),
-       setTimeLeft: (val) => set({ timeLeft: val }),
+      setTimeLeft: (val) =>
+    set((state) => ({
+      timeLeft: typeof val === "function" ? val(state.timeLeft) : Number(val),
+    })),
       setShowOtp: (val) => set({ showOtp: val }),
       setResendEnabled: (val) => set({ resendEnabled: val }),
       setLoading: (val) => set({ loading: val }),
