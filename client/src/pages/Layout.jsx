@@ -3,6 +3,7 @@ import { Outlet, useLocation } from 'react-router-dom'
 import MainNavbar from '../components/customUI/MainNavbar';
 import Navbar from '@/components/customUI/Navbar';
 import MitraBot from './MitraBot';
+import ChatBase from './ChatBase';
 
 const Layout = () => {
      const location = useLocation();
@@ -10,7 +11,8 @@ const Layout = () => {
   return (
     <div>
         {!hideNavbar ? <MainNavbar />:<Navbar/>}  
-       {!hideNavbar &&<MitraBot/> } 
+       {/* {!hideNavbar &&<MitraBot/> }  */}
+       {!hideNavbar &&<ChatBase/> } 
         <Outlet/>
     </div>
   )
