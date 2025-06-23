@@ -12,7 +12,7 @@ const Layout = () => {
     <div>
         {!hideNavbar ? <MainNavbar />:<Navbar/>}  
        {/* {!hideNavbar &&<MitraBot/> }  */}
-       {!hideNavbar &&<ChatBase/> } 
+       {!hideNavbar &&<ChatBase/> }   {/* chatbase */}
         <Outlet/>
     </div>
   )
