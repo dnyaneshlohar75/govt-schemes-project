@@ -8,7 +8,7 @@ export async function chatWith8n8(request: Request, response: Response) {
     try {
         let chatInput = request.body.chatInput;
 
-        const resp = await fetch(process.env.N8N_WEBHOOK_URL || "https://dnyaneshlohar75.app.n8n.cloud/webhook-test/58b39116-7151-498d-ae43-d67491f03acc", {
+        const resp = await fetch(process.env.EIGHT_N_EIGHT_WEBHOOK_URL || "https://dnyaneshlohar75.app.n8n.cloud/webhook-test/58b39116-7151-498d-ae43-d67491f03acc", {
             method: "POST",
             body: JSON.stringify({
                 userId: request.body.userId || "dummy-id",
